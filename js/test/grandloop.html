@@ -1,0 +1,40 @@
+<html>
+<head>
+  <title>Test GrandLoop</title>
+  <script src="../base.js"></script>
+  <script src="../grandloop.js"></script>
+  <script src="../unittest.js"></script>
+  <script>
+    // date: 2013-05-19, author: mccreavy
+    function testInOrderProcessingOfHandlers() {
+      var grandloop = window.dirg.grandloop.create();
+      return true;
+    }
+
+    // date: 2013-05-19, author: mccreavy
+    function testAddHandler() {
+      return true;
+    }
+
+    // date: 2013-05-19, author: mccreavy
+    function testRemoveHandler() {
+      return true;
+    }
+
+    // date: 2013-05-19, author: mccreavy
+    function testRemoveMultipleHandlers() {
+      return true;
+    }
+
+    window.dirg.unittest.test(
+      [
+        testInOrderProcessingOfHandlers,
+        testAddHandler,
+        testRemoveHandler,
+        testRemoveMultipleHandlers
+      ]
+    );
+  </script>
+</head>
+<body></body>
+</html>

@@ -1,0 +1,41 @@
+<html>
+<head>
+  <title>Test Event</title>
+  <script src="../base.js"></script>
+  <script src="../debug.js"></script>
+  <script src="../event.js"></script>
+  <script src="../unittest.js"></script>
+  <script>
+    // date: 2013-05-19, author: mccreavy
+    function testCreatedEventTakenFromCache() {
+      return true;
+    }
+
+    // date: 2013-05-19, author: mccreavy
+    function testProcessedEventReturnedToQueue() {
+      return true;
+    }
+
+    // date: 2013-05-19, author: mccreavy
+    function testQueuedEventsProcessedInOrder() {
+      return true;
+    }
+
+    // date: 2013-05-19, author: mccreavy
+    function testPushedEventProcessedFirst() {
+      return true;
+    }
+
+    window.dirg.unittest.test(
+      [
+        testCreatedEventTakenFromCache,
+        testProcessedEventReturnedToQueue,
+        testQueuedEventsProcessedInOrder,
+        testPushedEventProcessedFirst
+      ]
+    );
+
+  </script>
+</head>
+<body></body>
+</html>

@@ -1,0 +1,11 @@
+
+body {
+  background-color: #111111;
+}
+
+canvas {
+  border: 1px solid green;
+  display: block;
+  margin-bottom: 10px;
+  background-color: #222222;
+}

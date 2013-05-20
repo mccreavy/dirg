@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <title>Test Canvas</title>
+    <link rel="stylesheet" type="text/css" media="all" href="test.css"/>
+    <script src="../../jquery/jquery-1.9.1.js"></script>
+    <script src="../base.js"></script>
+    <script src="../debug.js"></script>
+    <script src="../canvas.js"></script>
+    <script src="../unittest.js"></script>
+    <script src="../point.js"></script>
+    <script>
+      // date: 2013-05-19, author: mccreavy
+      function testDrawCenteredRectangleNaturalWidth() {
+        var dom = $('<canvas>')[0];
+        $('body').append(dom);
+        var canvas = window.dirg.Canvas({'dom': dom});
+        canvas.context.fillRect(-25, -25, 50, 50);
+        return true;
+      }
+
+      // date: 2013-05-19, author: mccreavy
+      function testDrawCenteredRectangleDefinedWidth() {
+        var dom = $('<canvas width="150" height="150">')[0];
+        $('body').append(dom);
+        var canvas = window.dirg.Canvas({'dom': dom});
+        canvas.context.fillRect(-25, -25, 50, 50);
+        return true;
+      }
+
+      // date: 2013-05-19, author: mccreavy
+      function testDrawRectangle() {
+        var dom = $('<canvas>')[0];
+        $('body').append(dom);
+        var canvas = window.dirg.Canvas({'dom': dom});
+
+        canvas.context.fillRect(2, 2, 50, 50);
+        return true;
+      }
+
+      // date: 2013-05-19, author: mccreavy
+      function testDrawCenteredHexagon() {
+        var dom = $('<canvas>')[0];
+        $('body').append(dom);
+        var canvas = window.dirg.Canvas({'dom': dom});
+
+        var p = window.dirg.Point(0, 25);
+        canvas.context.beginPath();
+        for (var i = 0 ; i < 5 ; i++) {
+          if (i == 0) {
+            canvas.context.moveTo(p);
+          } else {
+            canvas.context.lineTo(p);
+          }
+          p.rotate(2);
+          console.log("p: ", p);
+        }
+        canvas.context.stroke();
+        return true;
+      }
+
+
+      $('document').ready(function() {
+        window.dirg.unittest.test(
+          [
+            testDrawCenteredHexagon,
+            testDrawCenteredRectangleNaturalWidth,
+            testDrawCenteredRectangleDefinedWidth,
+            testDrawRectangle
+          ]
+        );
+      });
+    </script>
+  </head>
+  <body></body>
+</html>

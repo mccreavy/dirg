@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>Test Board</title>
+    <script src="../../js/base.js"></script>
+    <script src="../../js/debug.js"></script>
+    <script src="../../js/point.js"></script>
+    <script src="../board.js"></script>
+    <script src="../../js/unittest.js"></script>
+    <script>
+      // date: 2013-05-19, author: mccreavy
+      function testCreateBoardRadius1() {
+        var board = dirg.board.create({ 'radius' : 1});
+
+        return (board.node.length == 1);
+      }
+
+      // date: 2013-05-19, author: mccreavy
+      function testCreateBoardRadius2() {
+        var board = dirg.board.create({ 'radius' : 2});
+
+        return (board.node.length == 7);
+      }
+
+      // date: 2013-05-19, author: mccreavy
+      function testCreateBoardRadius3() {
+        var board = dirg.board.create({ 'radius' : 3});
+
+        return (board.node.length == 7);
+      }
+
+      window.dirg.unittest.test(
+        [
+          testCreateBoardRadius1(),
+          testCreateBoardRadius2(),
+          testCreateBoardRadius3()
+        ]
+      );
+    </script>
+</head>
+<body></body>
+</html>

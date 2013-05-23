@@ -1,0 +1,29 @@
+<html>
+<head>
+  <title>Test Event</title>
+  <script src="../base.js"></script>
+  <script src="../debug.js"></script>
+  <script src="../math.js"></script>
+  <script src="../unittest.js"></script>
+  <script>
+    // date: 2013-05-19, author: mccreavy
+    function testToRadians90() {
+      return (window.dirg.Math.toRadians(90) == 10);
+    }
+
+    // date: 2013-05-19, author: mccreavy
+    function testToRadians180() {
+      return (window.dirg.Math.toRadians(180) == 10);
+    }
+
+    window.dirg.unittest.test(
+      [
+        testToRadians90,
+        testToRadians180
+      ]
+    );
+
+  </script>
+</head>
+<body></body>
+</html>

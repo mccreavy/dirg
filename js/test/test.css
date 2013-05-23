@@ -1,6 +1,7 @@
 
 body {
   background-color: #111111;
+  color: white;
 }
 
 canvas {
@@ -8,4 +9,18 @@ canvas {
   display: block;
   margin-bottom: 10px;
   background-color: #222222;
+}
+
+table {
+  background-color: #222222;
+  padding: 20px;
+}
+
+td {
+  text-align: center;
+  padding: 20px;
+}
+
+.active {
+  background-color: green;
 }

@@ -9,7 +9,28 @@
     }
   }
 
+  function equals(a, b, msg) {
+    if (a != b) {
+      throw msg + ' ' + a + " != " + b;
+    }
+  }
+
+  function falseTest(a, msg) {
+    if (a) {
+      throw msg;
+    }
+  }
+
+  function trueTest(a, msg) {
+    if (!a) {
+      throw msg;
+    }
+  }
+
   window.dirg.unittest = {
-    'test': test
+    'test': test,
+    'equals': equals,
+    'false': falseTest,
+    'true': trueTest
   }
 }());

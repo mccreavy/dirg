@@ -2,9 +2,78 @@
 <head>
   <title>Test GrandLoop</title>
   <script src="../base.js"></script>
+  <script src="../debug.js"></script>
   <script src="../grandloop.js"></script>
   <script src="../unittest.js"></script>
   <script>
+    // date: 2013-05-22, author: mccreavy
+    function testCycleCount() {
+      var grandloop = window.dirg.grandloop.create();
+      for (var i = 0 ; i < 10 ; i++) {
+        grandloop.cycle();
+      }
+      return (grandloop.cycleCount == 10);
+    }
+
+    // date: 2013-05-22, author: mccreavy
+    function testPushPreHook() {
+      var grandloop = window.dirg.grandloop.create();
+      var hookACount = 0;
+      var hookA = function hookA() { hookACount++; }
+      var hookBCount = 0;
+      var hookB = function hookB() { hookBCount++; }
+
+      grandloop.pushHook("TEST", hookA);
+      grandloop.pushHook("TEST", hookB);
+
+      dirg.unittest.equals(
+          2, grandloop.hook["TEST"].length,
+          "Hooks Added");
+
+      grandloop.removeHook("TEST", hookA);
+
+      dirg.unittest.equals(
+          1, grandloop.hook["TEST"].length,
+          "Hook Removed");
+
+      grandloop.removeHook("TEST", hookB);
+
+      window.dirg.unittest.false(
+          "TEST" in grandloop.hook,
+          "Empty Type Deleted");
+
+      grandloop.pushHook("TEST", hookA);
+      grandloop.pushHook("TEST", hookB);
+      grandloop.pushHook("TEST", hookA);
+      grandloop.pushHook("TEST", hookB);
+
+      dirg.unittest.equals(
+          4, grandloop.hook["TEST"].length,
+          "Hooks Added");
+      return true;
+    }
+
+    // date: 2013-05-22, author: mccreavy
+    function testPreCycleCount() {
+      var grandloop = window.dirg.grandloop.create();
+      var preCycleCount = 0;
+      var preCycle = function() { preCycleCount++ };
+      grandloop.pushHook("PRE", preCycle);
+      for (var i = 0 ; i < 10 ; i++) {
+        grandloop.cycle();
+      }
+      grandloop.removeHook("PRE", preCycle);
+      for (var i = 0 ; i < 10 ; i++) {
+        grandloop.cycle();
+      }
+      grandloop.pushHook("PRE", preCycle);
+      for (var i = 0 ; i < 10 ; i++) {
+        grandloop.cycle();
+      }
+      dirg.debug.log("preCycleCount: " + preCycleCount);
+      return (preCycleCount == 20);
+    }
+
     // date: 2013-05-19, author: mccreavy
     function testInOrderProcessingOfHandlers() {
       var grandloop = window.dirg.grandloop.create();
@@ -28,7 +97,10 @@
 
     window.dirg.unittest.test(
       [
+        testCycleCount,
+        testPreCycleCount,
         testInOrderProcessingOfHandlers,
+        testPushPreHook,
         testAddHandler,
         testRemoveHandler,
         testRemoveMultipleHandlers

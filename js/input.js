@@ -44,4 +44,4 @@
   window.dirg.input = {
     'create': create
   };
-}());
+})();

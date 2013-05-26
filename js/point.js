@@ -11,4 +11,4 @@
   }
 
   window.dirg.Point = Point;
-}());
+})();

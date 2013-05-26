@@ -1,0 +1,30 @@
+<html>
+<head>
+  <title>Test GrandLoop Cycling</title>
+  <script src="../base.js"></script>
+  <script src="../debug.js"></script>
+  <script src="../grandloop.js"></script>
+  <script src="../requestAnimationFrame.js"></script>
+  <script src="../unittest.js"></script>
+  <script>
+    var grandloop = window.dirg.grandloop.create();
+    grandloop.pushHook('START',
+      function() {
+        console.log("Started");
+      });
+    grandloop.pushHook('PRE',
+      function() {
+        console.log("Cycling");
+      });
+    grandloop.pushHook('STOP',
+      function() {
+        console.log("Stopped");
+      });
+    grandloop.start();
+  </script>
+</head>
+<body>
+<h1>Grandloop Cycling</h1>
+<p>Test that cycling works: see console log for output.</p>
+</body>
+</html>

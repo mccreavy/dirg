@@ -4,7 +4,7 @@
   // date: 2013-05-19, author: mccreavy
   function test(tests) {
     for (var i = 0 ; i < tests.length ; i++) {
-      log("Test " + i + " of " + tests.length + ": " + tests[i].name);
+      log("Test " + (i+1) + " of " + tests.length + ": " + tests[i].name);
       log(" - " + (tests[i]() ? "PASSED" : "FAILED"));
     }
   }

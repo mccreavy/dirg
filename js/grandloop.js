@@ -8,7 +8,9 @@
       'cycle': cycle,
       'hook': {},
       'pushHook': pushHook,
-      'removeHook': removeHook
+      'removeHook': removeHook,
+      'start': start,
+      'stop': stop
     };
     return o;
   }
@@ -20,12 +22,32 @@
 
   // date: 2013-05-22; author: mccreavy
   function start() {
-
+    if ('START' in this.hook) {
+      for (var i = 0 ; i < this.hook['START'].length ; i++) {
+        try {
+          this.hook['START'][i]();
+        } catch (e) {
+          console.log("STARTHOOK EXCEPTION " + e);
+        }
+      }
+    }
+    // TODO(mccreavy): start the cycle interval
+    this.cycle();
   }
 
   // date: 2013-05-22; author: mccreavy
   function stop() {
+    // TODO(mccreavy): stop the cycle interval
 
+    if ('STOP' in this.hook) {
+      for (var i = 0 ; i < this.hook['STOP'].length ; i++) {
+        try {
+          this.hook['STOP'][i]();
+        } catch (e) {
+          console.log("STOPHOOK EXCEPTION " + e);
+        }
+      }
+    }
   }
 
   // date: 2013-05-22; author: mccreavy
@@ -77,9 +99,13 @@
         }
       }
     }
+    if (true) {
+      var self = this;
+      dirg.requestAnimationFrame(function() { self.cycle(); });
+    }
   }
 
   window.dirg.grandloop = {
     'create': create
   };
-}());
+})();

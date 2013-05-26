@@ -1,0 +1,100 @@
+<html>
+<head>
+  <title>Test Event</title>
+  <script src="../base.js"></script>
+  <script src="../debug.js"></script>
+  <script src="../event.js"></script>
+  <script src="../eventManager.js"></script>
+  <script src="../unittest.js"></script>
+  <script>
+    // date: 2013-05-26, author: mccreavy
+    function testEventsQueued() {
+      var eventManager = dirg.eventManager.create();
+      for (var i = 0 ; i < 10 ; i++) {
+        eventManager.enqueue(dirg.event.create());
+      }
+
+      dirg.unittest.equals(10, eventManager._queue.length);
+      return true;
+    }
+
+    // date: 2013-05-26, author: mccreavy
+    function testEventsProcess() {
+      var eventManager = dirg.eventManager.create();
+      for (var i = 0 ; i < 10 ; i++) {
+        eventManager.enqueue(dirg.event.create());
+      }
+
+      dirg.unittest.equals(10, eventManager._queue.length);
+      eventManager.process();
+      dirg.unittest.equals(0, eventManager._queue.length);
+
+      return true;
+    }
+
+    // date: 2013-05-26, author: mccreavy
+    function testEventsProcessCallback() {
+      var eventManager = dirg.eventManager.create();
+      var hooked = 0;
+      for (var i = 0 ; i < 10 ; i++) {
+        var e = dirg.event.create();
+        e.pushHook('PRE', function() { hooked++; });
+        eventManager.enqueue(e);
+      }
+
+      dirg.unittest.equals(10, eventManager._queue.length, "Events Enqueued");
+      eventManager.process();
+      dirg.unittest.equals(10, hooked, "Event Hook Called");
+      dirg.unittest.equals(0, eventManager._queue.length, "Events Removed");
+
+      return true;
+    }
+
+    // date: 2013-05-26, author: mccreavy
+    function testEventsHandleOrder() {
+      var eventManager = dirg.eventManager.create();
+      var hooked = 0;
+      var handleIndex = 0;
+
+      // Queue event we're tracking to the head.
+      var e = dirg.event.create();
+      e.pushHook('PRE', function() { handleIndex = hooked; });
+      eventManager.enqueue(e);
+
+      // Push (not queue) 5 events.
+      for (var i = 0 ; i < 5 ; i++) {
+        var e = dirg.event.create();
+        e.pushHook('PRE', function() { hooked++; });
+        eventManager.push(e);
+      }
+
+      // Queue 5 more events.
+      for (var i = 0 ; i < 5 ; i++) {
+        var e = dirg.event.create();
+        e.pushHook('PRE', function() { hooked++; });
+        eventManager.enqueue(e);
+      }
+
+      dirg.unittest.equals(11, eventManager._queue.length, "Events Enqueued");
+      eventManager.process();
+      dirg.unittest.equals(10, hooked, "Event Hook Called");
+      dirg.unittest.equals(0, eventManager._queue.length, "Events Removed");
+      dirg.unittest.equals(5, handleIndex, "Event in right spot");
+
+      return true;
+    }
+
+
+    window.dirg.unittest.test(
+      [
+        testEventsQueued,
+        testEventsProcess,
+        testEventsProcessCallback,
+        testEventsHandleOrder,
+      ]
+    );
+
+  </script>
+</head>
+<body></body>
+</html>

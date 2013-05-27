@@ -53,4 +53,4 @@
   window.dirg.eventManager = {
     'create': create
   };
-}());
+})();

@@ -1,0 +1,76 @@
+<html>
+<head>
+  <title>Test GrandLoop Cycling Canvas</title>
+  <link rel="stylesheet" type="text/css" media="all" href="test.css"/>
+  <script src="../../jquery/jquery-1.9.1.js"></script>
+  <script src="../base.js"></script>
+  <script src="../debug.js"></script>
+  <script src="../canvas.js"></script>
+  <script src="../event.js"></script>
+  <script src="../eventManager.js"></script>
+  <script src="../grandloop.js"></script>
+  <script src="../input.js"></script>
+  <script src="../point.js"></script>
+  <script src="../requestAnimationFrame.js"></script>
+  <script>
+    $(document).ready(function() {
+      var canvas = window.dirg.Canvas({ 'dom': $('#field')[0] });
+      var grandloop = dirg.grandloop.create();
+      var eventManager = dirg.eventManager.create();
+      var input = dirg.input.create({
+          'eventManager': eventManager,
+          'inputElement': '#field' });
+
+      // Expose for debugging.
+      window.game = {
+        'canvas': canvas,
+        'eventManager': eventManager,
+        'grandloop': grandloop,
+        'input': input,
+        'lastClick': { x: 0, y: 0 }
+      };
+
+      var v = 0;
+      // Called every cycle to process queued events and update UI.
+      grandloop.pushHook('PRE',
+        function() {
+          eventManager.process();
+          // Update the Mouse Position HTML
+          $("#mouse").text("(" + input.cursor.x + ", " +input.cursor.y +")");
+
+          canvas.clear();
+          canvas.context.strokeStyle="#8888FF";
+          canvas.context.beginPath();
+          canvas.context.moveTo(Math.sin(v/50)*100, 0);
+          canvas.context.lineTo(input.cursor.x - canvas.width/2,
+              input.cursor.y - canvas.height/2);
+          canvas.context.stroke();
+
+          canvas.context.fillStyle = "#FF0000";
+          canvas.context.beginPath();
+          canvas.context.arc(Math.sin(v++/50)*100,0,5, 2* Math.PI, false);
+          canvas.context.fill();
+
+          canvas.context.fillStyle = "#00FF00";
+          canvas.context.beginPath();
+          canvas.context.arc(input.cursor.x - canvas.width/2,
+              input.cursor.y - canvas.height/2,5, 2* Math.PI, false);
+          canvas.context.fill();
+        });
+
+      grandloop.start();
+    });
+  </script>
+</head>
+<body>
+  <h1>Grandloop Cycling Canvas</h1>
+  <center>
+    <p>Cursor: <span id="mouse">Not initialized</span></p>
+    <canvas id="field" width="800" height="300">
+    </canvas>
+  </center>
+  <p>Not a unit test.</p>
+  <p>Test that Input posts Events to Event Manager.</p>
+  <p>See console log for output.</p>
+</body>
+</html>

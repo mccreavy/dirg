@@ -1,4 +1,5 @@
 (function() {
+  // date: 2013-05-26, author: mccreavy
   window.dirg.requestAnimationFrame = (function(){
     var implementation = [
         'requestAnimationFrame',

@@ -10,7 +10,8 @@
       'pushHook': pushHook,
       'removeHook': removeHook,
       'start': start,
-      'stop': stop
+      'stop': stop,
+      'time': null
     };
     return o;
   }
@@ -78,6 +79,7 @@
 
   // date: 2013-05-22; author: mccreavy
   function cycle() {
+    this.time = new Date().getTime();
     this.cycleCount++;
     // precycle hooks
     if ('PRE' in this.hook) {

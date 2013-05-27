@@ -3,21 +3,39 @@
   <title>Test GrandLoop Cycling Events</title>
   <script src="../base.js"></script>
   <script src="../debug.js"></script>
+  <script src="../event.js"></script>
+  <script src="../eventManager.js"></script>
   <script src="../grandloop.js"></script>
   <script src="../requestAnimationFrame.js"></script>
-  <script src="../unittest.js"></script>
   <script>
     var grandloop = window.dirg.grandloop.create();
     var eventManager = window.dirg.eventManager.create();
+    var nextEventTime;
     grandloop.pushHook('START',
       function() {
         console.log("Started");
+
       });
+
+    // Called every cycle to update console and process queued events.
     grandloop.pushHook('PRE',
       function() {
-        event
         console.log("Cycling");
+        eventManager.process();
       });
+
+    // Called every cycle to check if its time to queue a new event.
+    grandloop.pushHook('PRE',
+      function() {
+        if (nextEventTime && grandloop.time < nextEventTime) {
+          return;
+        }
+        nextEventTime = grandloop.time + 10000;
+        var e = dirg.event.create();
+        e.pushHook('PRE', function() { console.log("event handled"); });
+        eventManager.enqueue(e);
+      });
+
     grandloop.pushHook('STOP',
       function() {
         console.log("Stopped");
@@ -27,6 +45,7 @@
 </head>
 <body>
   <h1>Grandloop Cycling Events</h1>
+  <p>Not a unit test.</p>
   <p>Test that cycling works and can be controlled by events</p>
   <p>See console log for output.</p>
 </body>

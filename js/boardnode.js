@@ -11,7 +11,8 @@
       'neighbor': {},
       'addNeighbor': addNeighbor,
       'containsPoint': containsPoint,
-      'render': render
+      'render': render,
+      'renderLabel': false
     };
     return o;
   };

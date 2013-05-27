@@ -47,14 +47,15 @@
       }
       radius += 2*Math.sqrt(Math.pow(o.size, 2) - Math.pow(o.size/2,2));
       ringCount++;
-    } while (ringCount < 10);
-
-    console.log("nodes: " + o.node.length);
+    } while (ringCount < 25);
 
     // connect the neighbors
-    // don't know how to do the math here, but I can calculate center points
-    // of neighbors and connect them up that way.  This is cheating, but helps
-    // "fill in edges" too.
+    // don't know how to do the geometry here to locate neighbors
+    // mathematically here, but I can calculate center points
+    // of neighbors and search for them that way...  exhaustively.
+    // Sucks because it takes so much CPU.
+    // There are several optimizations here I'm not going to do until the
+    // rest of the shit is done.
     for (var i = 0 ; i < o.node.length ; i++) {
       for (var j = 0 ; j < 6 ; j++) {
         var x = o.node[i].position.x +

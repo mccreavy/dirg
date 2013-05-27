@@ -27,7 +27,7 @@
           'eventManager': eventManager,
           'inputElement': '#field' });
       var cursor = dirg.Cursor();
-      var board = dirg.HexBoard({size: 35});
+      var board = dirg.HexBoard({size: 15});
 
       // Expose for debugging.
       window.game = {
@@ -54,6 +54,7 @@
 
           // Render
           canvas.clear();
+          //canvas.context.rotate(Math.PI/1000);
           board.render(canvas);
           cursor.render(canvas);
         });

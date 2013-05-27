@@ -5,15 +5,16 @@
     var o = dirg.Board(p);
 
     var r = [];
-    var COLS = 13;
-    var ROWS = 13;
+    var COLS = 15;
+    var ROWS = 15;
 
     // allocate the nodes
     var style = 'black';
     for (var y = 0 ; y < ROWS ; y++) {
       r[y] = [];
       for (var x = 0 ; x < COLS ; x++) {
-        r[y][x] = dirg.BoardNode({ 'x': x-COLS/2, 'y' : y-ROWS/2 });
+        r[y][x] = dirg.BoardNode({ 'size': o.size,
+            'x': x-COLS/2, 'y' : y-ROWS/2 });
         r[y][x].style = style;
         style = (style == 'white' ? 'black' : 'white'); // update
         o.node.push(r[y][x]);

@@ -1,0 +1,49 @@
+
+
+
+Message Type: CONNECT
+Direction: Client -> Server
+Reason: Sent to notify server.
+Expected Response: CONNECT_ACCEPTED, CONNECT_DENIED
+Parameters:
+ VERSION: Client Version
+
+
+
+Message Type: LOGIN
+Direction: Client -> Server
+Reason: Sent to establish identity with server.
+Expected Response: LOGIN_ACCEPTED, LOGIN_DENIED
+Parameters:
+ USERNAME: username
+ PASSWORD: password
+
+Message Type: LOGIN_ACCEPTED
+Direction: Server -> Client
+Reason:
+
+Message Type: LOGIN_DENIED
+Direction: Server -> Client
+
+Message Type: NEWACCOUNT
+Direction: Client -> Server
+Reason: Create an account from the client.
+Parameters:
+ USERNAME: username
+ PASSWORD: password
+Expected Response: NEWACCOUNT_ACCEPTED, NEWACCOUNT_DENIED
+
+Message Type: NEWACCOUNT_ACCEPTED
+Message Type: NEWACCOUNT_DENIED
+
+Message Type: ACCOUNT_CONNECTED
+Message Type: ACCOUNT_DISCONNECTED
+Message Type: ACCOUNT_JOINED_GAME
+Message Type: ACCOUNT_PARTED_GAME
+
+Message Type: GAME_CREATED
+Message Type: GAME_STARTED
+Message Type: GAME_FINISHED
+Message Type: GAME_CLOSED
+
+

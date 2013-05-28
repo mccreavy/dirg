@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title>WebSocket Demo</title>
+    <link rel="stylesheet" type="text/css" media="all" href="test.css"/>
+    <script src="../../jquery/jquery-1.9.1.js"></script>
+    <script src="../base.js"></script>
+    <script src="../debug.js"></script>
+    <script src="../socket.js"></script>
+    <script>
+      $(document).ready(function() {
+        console.log("instancing socket");
+        var w = dirg.Socket({'url': 'ws://localhost:8080/'});
+        console.log("past socket");
+      });
+    </script>
+  </head>
+  <body>
+    <h1>WebSocket Demo</h1>
+  </body>
+</html>

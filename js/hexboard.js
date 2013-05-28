@@ -47,7 +47,7 @@
       }
       radius += 2*Math.sqrt(Math.pow(o.size, 2) - Math.pow(o.size/2,2));
       ringCount++;
-    } while (ringCount < 25);
+    } while (ringCount < 15);
 
     // connect the neighbors
     // don't know how to do the geometry here to locate neighbors

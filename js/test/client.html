@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Client Demo</title>
+    <link rel="stylesheet" type="text/css" media="all" href="test.css"/>
+    <script src="../../jquery/jquery-1.9.1.js"></script>
+    <script src="../base.js"></script>
+    <script src="../debug.js"></script>
+    <script src="../socket.js"></script>
+    <script src="../client.js"></script>
+    <script>
+      var client = dirg.Client({'url': 'ws://localhost:8080/'});
+
+      $(document).ready(function() {
+        $('#connect').click(function(e) {
+          console.log("connect");
+        });
+
+        $('#login').click(function(e) {
+          console.log("login");
+          client.login(
+            { 'username': 'mike', 'password': 'egg' }
+          );
+        });
+
+        $('#newAccount').click(function(e) {
+          console.log("newAccount");
+          client.newAccount(
+            { 'username': 'mike', 'password': 'egg' }
+          );
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Client Demo</h1>
+    <p><button id="connect">Connect</button></p>
+    <p><button id="login">Login</button></p>
+    <p><button id="newAccount">New Account</button></p>
+    <p><button id="disconnect">Disconnect</button></p>
+    <p><button id="createGame">Create Game</button></p>
+    <p><button id="startGame">Start Game</button></p>
+    <p><button id="sendMessage">Send Message</button></p>
+  </body>
+</html>

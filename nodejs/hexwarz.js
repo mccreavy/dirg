@@ -14,20 +14,70 @@ function printConnections() {
   }
 }
 
+function handleLogin(id, ws, msg) {
+  connection[id].username = msg.username;
+  ws.send(JSON.stringify({ "type": "loginResponse", "accepted": true }));
+}
+
+function handleNewAccount(id, ws, msg) {
+  connection[id].username = msg.username;
+  ws.send(JSON.stringify({ "type": "newAccountResponse", "accepted": true }));
+}
+
+function handleUserList(id, ws, msg) {
+  var user = { };
+  for (var id in connection) {
+    if ("username" in connection[id]) {
+      user[id] = { "username": connection[id].username };
+    }
+  }
+  ws.send(JSON.stringify({ "type": "userListResponse", "user": user }));
+}
+
+function handleGameList(id, ws, msg) {
+  var game = { };
+  for (var id in game) {
+    game[id] = { "id": id };
+  }
+  ws.send(JSON.stringify({ "type": "gameListResponse", "game": game }));
+}
+
+function handleCreateGame(id, ws, msg) {
+
+}
+
+function handleStartGame(id, ws, msg) {
+
+}
+
+function handleLeaveGame(id, ws, msg) {
+
+}
+
 function handleMessage(id, ws, msg) {
-  if (msg.type == 'CONNECT') {
-    connection[id].connectReceived = true;
-    ws.send(JSON.stringify({ "type": "CONNECT_ACCEPTED" }));
-  } else if (msg.type == 'LOGIN') {
-
-  } else if (msg.type == 'NEWACCOUNT') {
-
-  } else if (msg.type == 'CREATE_GAME') {
-
-  } else if (msg.type == 'START_GAME') {
-
-  } else if (msg.type == 'LEAVE_GAME') {
-
+  try {
+    if (msg.type == 'connect') {
+      connection[id].connectReceived = true;
+      ws.send(JSON.stringify({ "type": "connectResponse", "accepted": true }));
+    } else if (msg.type == 'login') {
+      handleLogin(id, ws, msg);
+    } else if (msg.type == 'newAccount') {
+      handleNewAccount(id, ws, msg);
+    } else if (msg.type == 'userList') {
+      handleUserList(id, ws, msg);
+    } else if (msg.type == 'gameList') {
+      handleGameList(id, ws, msg);
+    } else if (msg.type == 'createGame') {
+      handleCreateGame(id, ws, msg);
+    } else if (msg.type == 'startGame') {
+      handleStartGame(id, ws, msg);
+    } else if (msg.type == 'leaveGame') {
+      handleLeaveGame(id, ws, msg);
+    } else {
+      ws.send(JSON.stringify({ "type": "ERROR", "msg" : "Unrecognized type: " + msg.type }));
+    }
+  } catch (e) {
+    ws.send(JSON.stringify({ "type": "ERROR", "msg" : "Exception: " + e }));
   }
 }
 

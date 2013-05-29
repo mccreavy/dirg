@@ -1,9 +1,11 @@
 (function() {
   function Socket(p) {
-    console.log("p ", p);
     var o = {
       'websocket': new WebSocket(p.url),
+      'send': send,
       'onOpen': onOpen,
+      'hook': {},
+      'pushHook': pushHook,
       'onClose': onClose,
       'onMessage': onMessage,
       'onError': onError
@@ -17,22 +19,69 @@
     return o;
   }
 
+  // date: 2013-05-28; author: mccreavy
+  function send(data) {
+    this.websocket.send(JSON.stringify(data));
+  }
+
+  // date: 2013-05-28; author: mccreavy
+  function pushHook(type, f) {
+    if (!(type in this.hook)) {
+      this.hook[type] = [];
+    }
+    this.hook[type].push(f);
+  }
+
+  // date: 2013-05-28; author: mccreavy
   function onOpen(e) {
-    console.log("onOpen: ", e);
-    this.websocket.send(JSON.stringify({"type": "CONNECT"}));
+    if ('OPEN' in this.hook) {
+      for (var i = 0 ; i < this.hook['OPEN'].length ; i++) {
+        try {
+          this.hook['OPEN'][i](e);
+        } catch (ex) {
+          console.log("Socket OPEN Hook Exception ", ex);
+        }
+      }
+    }
   }
 
+  // date: 2013-05-28; author: mccreavy
   function onClose(e) {
-    console.log("onClose: ", e);
+    if ('CLOSE' in this.hook) {
+      for (var i = 0 ; i < this.hook['CLOSE'].length ; i++) {
+        try {
+          this.hook['CLOSE'][i](e);
+        } catch (ex) {
+          console.log("Socket CLOSE Hook Exception ", ex);
+        }
+      }
+    }
   }
 
+  // date: 2013-05-28; author: mccreavy
   function onMessage(e) {
-    console.log("onMessage: ", e);
-    //this.websocket.send({'foo': 'bar'});
+    if ('MESSAGE' in this.hook) {
+      for (var i = 0 ; i < this.hook['MESSAGE'].length ; i++) {
+        try {
+          this.hook['MESSAGE'][i](e);
+        } catch (ex) {
+          console.log("Socket CLOSE Hook Exception ", ex);
+        }
+      }
+    }
   }
 
+  // date: 2013-05-28; author: mccreavy
   function onError(e) {
-    console.log("onError: ", e);
+    if ('ERROR' in this.hook) {
+      for (var i = 0 ; i < this.hook['ERROR'].length ; i++) {
+        try {
+          this.hook['ERROR'][i](e);
+        } catch (ex) {
+          console.log("Socket ERROR Hook Exception ", ex);
+        }
+      }
+    }
   }
 
   window.dirg.Socket = Socket;

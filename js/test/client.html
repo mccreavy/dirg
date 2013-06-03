@@ -13,13 +13,13 @@
       $(document).ready(function() {
         $('#connect').click(function(e) {
           client = dirg.Client({'url': 'ws://localhost:8080/'});
-          client.pushHook('OPEN', function() {
+          client.pushHook('OPEN', function(e) {
             $('#connectIndicator').css("background-color", "green");
-            console.log("CLIENT OPENED");
+            console.log("CLIENT OPENED", e);
           });
-          client.pushHook('CLOSE', function() {
+          client.pushHook('CLOSE', function(e) {
             $('#connectIndicator').css("background-color", "red");
-            console.log("CLIENT CLOSED");
+            console.log("CLIENT CLOSED", e);
           });
           client.open();
         });
@@ -41,6 +41,16 @@
         $("#userList").click(function(e) {
           console.log("userList");
           client.userList();
+        });
+
+        $("#createGame").click(function(e) {
+          console.log("createGame");
+          client.createGame();
+        });
+
+        $("#startGame").click(function(e) {
+          console.log("startGame");
+          client.startGame();
         });
       });
     </script>

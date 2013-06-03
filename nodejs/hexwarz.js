@@ -1,16 +1,29 @@
 
 
+require('./game');
+
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({ 'port': 8080 });
 
 // List of open connections, keyed by socket
 var connectionCount = 0;
 var connection = { };
+var gameCount = 0;
 var game = { };
 
 function printConnections() {
   for (var i in connection) {
     console.log("CONNECTION " + i);
+  }
+}
+
+function handleConnect(id, ws, msg) {
+  connection[id].connectReceived = true;
+  if (msg.version >= 1.0) {
+    ws.send(JSON.stringify({ "type": "connectResponse", "accepted": true }));
+  } else {
+    ws.send(JSON.stringify({ "type": "connectResponse", "accepted": false, "reason": "refresh client" }));
+    ws.close();
   }
 }
 
@@ -43,11 +56,19 @@ function handleGameList(id, ws, msg) {
 }
 
 function handleCreateGame(id, ws, msg) {
-
+  var id = gameCount++;
+  game[id] = Game();
+  ws.send(JSON.stringify({ "type": "connectResponse", "id": id }));
 }
 
 function handleStartGame(id, ws, msg) {
+  if (!msg.id in game) {
+    ws.send(JSON.stringify({ "type": "startGameResponse", "accepted": false,
+        "reason": "unknown id: " + msg.id }));
+    return;
+  }
 
+  console.log("Starting Game -- initialize with current number of players");
 }
 
 function handleLeaveGame(id, ws, msg) {
@@ -57,8 +78,7 @@ function handleLeaveGame(id, ws, msg) {
 function handleMessage(id, ws, msg) {
   try {
     if (msg.type == 'connect') {
-      connection[id].connectReceived = true;
-      ws.send(JSON.stringify({ "type": "connectResponse", "accepted": true }));
+      handleConnect(id, ws, msg);
     } else if (msg.type == 'login') {
       handleLogin(id, ws, msg);
     } else if (msg.type == 'newAccount') {
@@ -91,12 +111,13 @@ wss.on('connection', function(ws) {
     printConnections();
   });
   ws.on('close', function() {
+    clearInterval(connection[id].interval);
     delete connection[id];
     console.log('closed');
     printConnections();
   });
 
-  setInterval(function() {
+  connection[id].interval = setInterval(function() {
     ws.send(JSON.stringify({ "type": "PING" }));
   }, 5000);
 });

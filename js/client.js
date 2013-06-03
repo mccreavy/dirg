@@ -9,6 +9,8 @@
       "newAccount": newAccount,
       "pushHook": pushHook,
       "userList": userList,
+      "createGame": createGame,
+      "startGame": startGame,
       "onOpen": onOpen,
       "onClose": onClose,
       "onMessage": onMessage,
@@ -32,10 +34,16 @@
     this.socket.pushHook('OPEN', function(e) { self.onOpen(e) });
     this.socket.pushHook('CLOSE', function(e) { self.onClose(e) });
     this.socket.pushHook('MESSAGE', function(e) { self.onMessage(e) });
+
+    // I should expect a OPEN and a VERSION 
   }
 
   // date: 2013-05-28; author: mccreavy
   function onOpen(e) {
+    var msg = {
+      "type": "connect",
+      "version": 1.0
+    };
     if ('OPEN' in this.hook) {
       for (var i = 0 ; i < this.hook['OPEN'].length ; i++) {
         try {
@@ -45,6 +53,7 @@
         }
       }
     }
+    this.socket.send(msg);
   }
 
   // date: 2013-05-28; author: mccreavy
@@ -71,7 +80,24 @@
         }
       }
     }
-    console.log("Process Messages of interest to me.");
+    var d;
+    try {
+      d = JSON.parse(data);
+      console.log("message", d);
+    } catch(ex) {
+      return;
+    }
+    if (d.type == "connectResponse") {
+
+    } else if (d.type == "loginResponse") {
+
+    } else if (d.type == "userListResponse") {
+
+    } else if (d.type == "gameListResponse") {
+
+    } else if (d.type == "chatMessage") {
+
+    }
   }
 
   // date: 2013-05-28; author: mccreavy
@@ -102,6 +128,22 @@
   function userList(p) {
     var msg = {
       "type": "userList"
+    };
+    this.socket.send(msg);
+  }
+
+  // date: 2013-06-01; author: mccreavy
+  function createGame(p) {
+    var msg = {
+      "type": "createGame"
+    };
+    this.socket.send(msg);
+  }
+
+  // date: 2013-06-01; author: mccreavy
+  function startGame(p) {
+    var msg = {
+      "type": "startGame"
     };
     this.socket.send(msg);
   }

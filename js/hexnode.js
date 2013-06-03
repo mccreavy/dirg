@@ -47,11 +47,13 @@
       canvas.context.strokeText(this.id,
           this.position.x - metrics.width/2,
           this.position.y);
+      /*
       var msg = (this.position.x|0) + "," + (this.position.y|0);
       metrics = canvas.context.measureText(msg);
       canvas.context.strokeText(msg,
           this.position.x - metrics.width/2,
           this.position.y + 10);
+      */
     }
 
     /*

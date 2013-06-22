@@ -1,4 +1,4 @@
-var HexNode = require('./hexnode');
+var HexNode = require('./hexnode').HexNode;
 
 function HexBoard(p) {
   var o = {

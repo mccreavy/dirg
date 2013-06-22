@@ -1,5 +1,5 @@
 
-require('./math');
+var MMath = require('./math').MMath;
 
 // date: 2013-06-01, author: mccreavy
 function HexNode(p) {

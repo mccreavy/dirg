@@ -11,27 +11,90 @@
       var client;
 
       $(document).ready(function() {
-        $('#connect').click(function(e) {
+        $("#connect").click(function(e) {
           client = dirg.Client({'url': 'ws://localhost:8080/'});
           client.pushHook('OPEN', function(e) {
             $('#connectIndicator').css("background-color", "green");
             console.log("CLIENT OPENED", e);
+            $(".offlineAction").attr("disabled", "disabled");
+            $(".onlineAction").removeAttr("disabled");
           });
           client.pushHook('CLOSE', function(e) {
             $('#connectIndicator').css("background-color", "red");
             console.log("CLIENT CLOSED", e);
+            $(".offlineAction").removeAttr("disabled");
+            $(".onlineAction").attr("disabled", "disabled");
+          });
+          client.pushHook("LOGIN_SUCCESS", function() {
+            $("#loginStateContent").text("LOGGED IN");
+          });
+          client.pushHook("NEW_ACCOUNT_SUCCESS", function() {
+            $("#loginStateContent").text("(NEWLY) LOGGED IN");
+          });
+          client.pushHook("LOGOUT", function() {
+            $("#loginStateContent").text("LOGGED OUT");
+          });
+          client.pushHook("USER_LIST_UPDATED", function(e) {
+            $('#userListContent').empty();
+            for (var i in client.user) {
+              $("#userListContent").append("<p>" + client.user[i].connectionId + ":" + client.user[i].id + ":" +
+                  client.user[i].name + "</p>");
+            }
+          });
+          client.pushHook("GAME_LIST_UPDATED", function(e) {
+            $("#gameListContent").empty();
+            // TODO(mccreavy): rebuild the gameContent from scratch.
+            // TODO(mccreavy): Need to use same logic for building each one as GAME_UPDATED.
+            for (var i in client.game) {
+              $("#gameListContent").append(
+                  "<p>" + client.game[i].id + ":Game" +
+                  "<button>Start</button>" +
+                  "<button>Join</button>" +
+                  "<button>Leave</button>" +
+                  "</p>");
+            }
+          });
+          client.pushHook("GAME_UPDATED", function(gameId) {
+            console.log("1", gameId);
+            var game = client.game[gameId];
+            console.log("2", game);
+            var domId = "#gameContent" + gameId;
+            console.log("3");
+            var gameDom = $(domId);
+            console.log("4");
+            if (gameDom.length == 0) {
+              gameDom = $("<div id='gameContent" + gameId + "'></div>");
+              $("#gameListContent").append(gameDom);
+            }
+            gameDom.empty();
+            console.log("5", game);
+            gameDom.append("<p>ID: " + game.id + "," + game.owner + "</p>");
+          });
+          client.pushHook("PLAYER_JOIN", function(e) {
+            // Locate the game, add a player.
+          });
+          client.pushHook("PLAYER_PART", function(e) {
+            // Locate the game, remove the player.
           });
           client.open();
         });
 
-        $('#login').click(function(e) {
+        $("#disconnect").click(function(e) {
+          client.close();
+        });
+
+        $("#login").click(function(e) {
           console.log("login");
           client.login(
             { 'username': 'mike', 'password': 'egg' }
           );
         });
 
-        $('#newAccount').click(function(e) {
+        $("#logout").click(function(e) {
+          client.logout();
+        });
+
+        $("#newAccount").click(function(e) {
           console.log("newAccount");
           client.newAccount(
             { 'username': 'mike', 'password': 'egg' }
@@ -44,13 +107,7 @@
         });
 
         $("#createGame").click(function(e) {
-          console.log("createGame");
           client.createGame();
-        });
-
-        $("#startGame").click(function(e) {
-          console.log("startGame");
-          client.startGame();
         });
       });
     </script>
@@ -58,13 +115,22 @@
   <body>
     <h1>Client Demo</h1>
     <p><div id="connectIndicator" style="width: 50px; height: 50px; background-color: red"></div></p>
-    <p><button id="connect">Connect</button></p>
-    <p><button id="login">Login</button></p>
-    <p><button id="newAccount">New Account</button></p>
-    <p><button id="disconnect">Disconnect</button></p>
-    <p><button id="userList">User List</button></p>
-    <p><button id="createGame">Create Game</button></p>
-    <p><button id="startGame">Start Game</button></p>
-    <p><button id="sendMessage">Send Message</button></p>
+    <p><button id="connect" class="offlineAction">Connect</button></p>
+    <p><button id="disconnect" class="onlineAction" disabled>Disconnect</button></p>
+    <p><button id="login" class="onlineAction" disabled>Login</button></p>
+    <p><button id="logout" class="onlineAction" disabled>Logout</button></p>
+    <p><button id="newAccount" class="onlineAction" disabled>New Account</button></p>
+    <p><button id="userList" class="onlineAction" disabled>User List</button></p>
+    <p><button id="createGame" class="onlineAction" disabled>Create Game</button></p>
+    <p><button id="sendMessage" class="onlineAction" disabled>Send Message</button></p>
+    <div id = "loginStateContent"></div>
+    <div>
+      <h1>USERLIST</h1>
+      <div id="userListContent"></div>
+    </div>
+    <div>
+      <h1>GAMELIST</h1>
+      <div id="gameListContent"></div>
+    </div>
   </body>
 </html>

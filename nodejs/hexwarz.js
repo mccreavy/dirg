@@ -1,6 +1,6 @@
 
 
-require('./game');
+var Game = require('./game').Game;
 
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({ 'port': 8080 });
@@ -17,54 +17,180 @@ function printConnections() {
   }
 }
 
+function sendObj(ws, obj) {
+  var o = JSON.stringify(obj);
+  console.log("Sending: " + o);
+  ws.send(o);
+}
+
+function sendAll(obj) {
+  for (var i in connection) {
+    sendObj(connection[i].ws, obj);
+  }
+}
+
+function handleClose(id) {
+  // remove the player from any active games?
+  // instead of iterating over all games, connection will have list of games.
+  for (var i in game) {
+    console.log("Need to check about removing id " + id + " from game " + i);
+  }
+
+  for (var i in connection) {
+    sendObj(connection[i].ws, { "type": "userRemoved",
+       "user": { "id" : id }});
+  }
+}
+
 function handleConnect(id, ws, msg) {
   connection[id].connectReceived = true;
   if (msg.version >= 1.0) {
-    ws.send(JSON.stringify({ "type": "connectResponse", "accepted": true }));
+    sendObj(ws, { "type": "connectResponse", "accepted": true });
+    sendUserList(ws);
+    sendGameList(ws);
   } else {
-    ws.send(JSON.stringify({ "type": "connectResponse", "accepted": false, "reason": "refresh client" }));
+    sendObj(ws, { "type": "connectResponse", "accepted": false,
+        "reason": "refresh client" });
     ws.close();
   }
 }
 
-function handleLogin(id, ws, msg) {
-  connection[id].username = msg.username;
-  ws.send(JSON.stringify({ "type": "loginResponse", "accepted": true }));
+function loadAccount(username, password) {
+    return { "name": username, "id": 345 };
 }
 
+function newAccount(username, password) {
+    return { "name": username, "id": 834 };
+}
+
+function handleLogin(id, ws, msg) {
+  if ('account' in connection[id]) {
+    sendObj(ws, { "type": "loginResponse", "accepted": false,
+        "reason": "already logged in: " + connection[id].account.name });
+    return;
+  }
+
+  var account = loadAccount(msg.username, msg.password);
+
+  if (null == account) {
+    sendObj(ws, { "type": "loginResponse", "accepted": false,
+        "reason": "invalid credentials" });
+    return;
+  }
+  connection[id].account = account;
+
+  // TODO(mccreavy): restore user to any games they're active in.
+
+  sendObj(ws, { "type": "loginResponse", "accepted": true,
+      "account": account });
+
+  // Tell all connections about the new user
+  sendAll({ "type": "userAdded",
+      "user": { "name": account.name, "id" : account.id,
+      "connectionId": id }});
+}
+
+function handleLogout(id, ws, msg) {
+  if (!("account" in connection[id])) {
+    sendObj(ws, { "type": "logoutResponse", "accepted": false,
+        "reason": "not logged in" });
+    return;
+  }
+
+  sendObj(ws, { "type": "logoutResponse", "accepted": true });
+  // TODO(mccreavy): notify people they're legitimately logging out?
+  ws.close();
+}
+
+/**
+ * - TODO(mccreavy): if parameters not present, deny.
+ * - if the user is already logged in, deny.
+ */
 function handleNewAccount(id, ws, msg) {
-  connection[id].username = msg.username;
-  ws.send(JSON.stringify({ "type": "newAccountResponse", "accepted": true }));
+  if ('account' in connection[id]) {
+    sendObj(ws, { "type": "newAccountResponse", "accepted": false,
+        "reason": "already logged in: " + connection[id].account.name });
+    return;
+  }
+
+  var account = newAccount(msg.username, msg.password);
+
+  if (null == account) {
+    sendObj(ws, { "type": "newAccountResponse", "accepted": false,
+        "reason": "Couldn't create new account" });
+    return;
+  }
+
+  connection[id].account = account;
+  sendObj(ws, { "type": "newAccountResponse", "accepted": true,
+      "account": account });
+
+  sendAll({ "type": "userAdded",
+      "user": { "username": account.name, "id" : account.id }});
+}
+
+function sendUserList(ws) {
+  var user = [];
+  for (var id in connection) {
+    if ("account" in connection[id]) {
+      user.push({ "id": connection[id].account.id,
+          "connectionId": id,
+          "name": connection[id].account.name });
+    }
+  }
+  sendObj(ws, { "type": "userListResponse", "user": user });
 }
 
 function handleUserList(id, ws, msg) {
-  var user = { };
-  for (var id in connection) {
-    if ("username" in connection[id]) {
-      user[id] = { "username": connection[id].username };
-    }
+  sendUserList(ws);
+}
+
+function sendGameList(ws) {
+  var games = [];
+  for (var id in game) {
+    // TODO(mccreavy): send full representation of game.
+    games.push({ "id": game[id].id,
+        "owner": game[id].owner,
+        "account": game[id].account });
   }
-  ws.send(JSON.stringify({ "type": "userListResponse", "user": user }));
+  console.log("FINAL: ");
+  sendObj(ws, { "type": "gameListResponse", "game": games });
 }
 
 function handleGameList(id, ws, msg) {
-  var game = { };
-  for (var id in game) {
-    game[id] = { "id": id };
-  }
-  ws.send(JSON.stringify({ "type": "gameListResponse", "game": game }));
+  sendGameList(ws);
 }
 
-function handleCreateGame(id, ws, msg) {
-  var id = gameCount++;
-  game[id] = Game();
-  ws.send(JSON.stringify({ "type": "connectResponse", "id": id }));
+function handleCreateGame(connectionId, ws, msg) {
+  if (!("account" in connection[connectionId])) {
+    sendObj(ws, { "type": "createGameResponse", "accepted": false,
+        "reason": "Must be logged in to create game" });
+    return;
+  }
+
+  // TODO(mccreavy): conditionally create game, otherwise send accepted=false
+  var newGame = Game({ owner: connection[connectionId].account.id });
+  game[newGame.id] = newGame;
+
+  sendObj(ws,
+      { "type": "createGameResponse",
+        "accepted": true,
+        "game": { "id": newGame.id,
+            "owner": newGame.owner,
+            "account": newGame.account }
+      });
+
+  // Automatically add the given player?
+  //if (newGame.addPlayer(userId)) {
+  //  sendObj(ws, { "type": "playerAdded", "gameId": newGame.id,
+  //      "userId": userId });
+  //}
 }
 
 function handleStartGame(id, ws, msg) {
   if (!msg.id in game) {
-    ws.send(JSON.stringify({ "type": "startGameResponse", "accepted": false,
-        "reason": "unknown id: " + msg.id }));
+    sendObj(ws, { "type": "startGameResponse", "accepted": false,
+        "reason": "unknown id: " + msg.id });
     return;
   }
 
@@ -77,10 +203,12 @@ function handleLeaveGame(id, ws, msg) {
 
 function handleMessage(id, ws, msg) {
   try {
-    if (msg.type == 'connect') {
+    if (msg.type == 'connectRequest') {
       handleConnect(id, ws, msg);
     } else if (msg.type == 'login') {
       handleLogin(id, ws, msg);
+    } else if (msg.type == "logout") {
+      handleLogout(id, ws, msg);
     } else if (msg.type == 'newAccount') {
       handleNewAccount(id, ws, msg);
     } else if (msg.type == 'userList') {
@@ -94,10 +222,12 @@ function handleMessage(id, ws, msg) {
     } else if (msg.type == 'leaveGame') {
       handleLeaveGame(id, ws, msg);
     } else {
-      ws.send(JSON.stringify({ "type": "ERROR", "msg" : "Unrecognized type: " + msg.type }));
+      ws.send(JSON.stringify({ "type": "ERROR",
+          "msg" : "Unrecognized type: " + msg.type }));
     }
   } catch (e) {
-    ws.send(JSON.stringify({ "type": "ERROR", "msg" : "Exception: " + e }));
+    sendObj({ "type": "ERROR", "msg" : "Exception: " + e });
+    throw e;
   }
 }
 
@@ -115,9 +245,10 @@ wss.on('connection', function(ws) {
     delete connection[id];
     console.log('closed');
     printConnections();
+    handleClose(id);
   });
 
-  connection[id].interval = setInterval(function() {
-    ws.send(JSON.stringify({ "type": "PING" }));
-  }, 5000);
+  //connection[id].interval = setInterval(function() {
+  //  ws.send(JSON.stringify({ "type": "PING" }));
+  //}, 5000);
 });

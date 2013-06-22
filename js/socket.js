@@ -2,6 +2,7 @@
   function Socket(p) {
     var o = {
       'websocket': new WebSocket(p.url),
+      'close': close,
       'send': send,
       'onOpen': onOpen,
       'hook': {},
@@ -17,6 +18,12 @@
     o.websocket.onerror = function(e) { o.onError(e); };
 
     return o;
+  }
+
+  // date: 2013-06-15; author: mccreavy
+  function close() {
+    this.websocket.close();
+    this.websocket = null;
   }
 
   // date: 2013-05-28; author: mccreavy

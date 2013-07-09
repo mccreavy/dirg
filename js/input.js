@@ -9,6 +9,7 @@
     var o = {
       'addListeners': addListeners,
       'cursor': dirg.Point(0,0),
+      'rawCursor': dirg.Point(0,0), // raw offset in element.
       'eventManager': (p && 'eventManager' in p) ? p.eventManager : null,
       'inputElement': (p && 'inputElement' in p) ? p.inputElement: 'needOne',
       'key': []
@@ -27,8 +28,10 @@
       self.key[e.keyCode] = 0;
     });
     $(this.inputElement).mousemove(function(e) {
-      self.cursor.x = e.offsetX;
-      self.cursor.y = e.offsetY;
+      self.rawCursor.x = e.offsetX;
+      self.rawCursor.y = e.offsetY;
+      self.cursor.x = e.offsetX - $(self.inputElement).width()/2;
+      self.cursor.y = e.offsetY - $(self.inputElement).height()/2;
       if (self.eventManager) {
         var ev = dirg.event.create({ name: 'mousemove' });
         self.eventManager.enqueue(ev);

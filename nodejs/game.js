@@ -10,11 +10,16 @@ function addPlayer(userId) {
   return true;
 }
 
+// Need a method for serializing game state for transport.
+// Maybe make a wrapper class to handle that rather than doing
+// it "inside" here.
+
 function Game(p) {
   var o = {
     'id': id++,
     'board': HexBoard(),
-    'owner': p.owner,  // owner by account id
+    'owner': p.owner,  // owner by account id ... needed?
+                       // or just assume account[0] is the owner?
     'account': [ p.owner ], // players by id
     'addPlayer': addPlayer
   };

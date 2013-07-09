@@ -8,6 +8,7 @@
       "hook": {},
       "login": login,
       "logout": logout,
+      "message": message,
       "callHooks": callHooks,
       "newAccount": newAccount,
       "pushHook": pushHook,
@@ -132,6 +133,9 @@
     } else if (d.type == "userRemoved") {
       delete this.user[d.user.id];
       this.callHooks("USER_LIST_UPDATED");
+    } else if (d.type == "gameAdded") {
+      this.game[d.gameHeader.id] = d.gameHeader;
+      this.callHooks("GAME_LIST_UPDATED");
     } else if (d.type == "gameListResponse") {
        for (var i = 0 ; i < d.game.length ; i++) {
          this.game[d.game[i].id] = d.game[i];
@@ -176,6 +180,15 @@
   function logout() {
     var msg = {
       "type": "logout"
+    };
+    this.socket.send(msg);
+  }
+
+  function message(destination, content) {
+    var msg = {
+      "type": "message",
+      "destination": destination,
+      "content": content
     };
     this.socket.send(msg);
   }

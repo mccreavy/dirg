@@ -7,10 +7,29 @@
     <script src="../debug.js"></script>
     <script src="../socket.js"></script>
     <script src="../client.js"></script>
+    <script src="../ChatWidget.js"></script>
+    <script src="../GameListWidget.js"></script>
+    <script src="../UserListWidget.js"></script>
     <script>
       var client;
+      var gameListWidget;
+      var userListWidget;
+      var chatWidget;
 
       $(document).ready(function() {
+        gameListWidget = window.dirg.GameListWidget(
+          { 'container': $('#gameListContent')[0] }
+        );
+        gameListWidget.render();
+        userListWidget = window.dirg.UserListWidget(
+          { 'container': $('#userListContent')[0] }
+        );
+        userListWidget.render();
+        chatWidget = window.dirg.ChatWidget(
+          { 'container': $('#chatContent')[0] }
+        );
+        chatWidget.render();
+
         $("#connect").click(function(e) {
           client = dirg.Client({'url': 'ws://localhost:8080/'});
           client.pushHook('OPEN', function(e) {
@@ -24,6 +43,7 @@
             console.log("CLIENT CLOSED", e);
             $(".offlineAction").removeAttr("disabled");
             $(".onlineAction").attr("disabled", "disabled");
+            $("#loginStateContent").empty();
           });
           client.pushHook("LOGIN_SUCCESS", function() {
             $("#loginStateContent").text("LOGGED IN");
@@ -35,24 +55,15 @@
             $("#loginStateContent").text("LOGGED OUT");
           });
           client.pushHook("USER_LIST_UPDATED", function(e) {
-            $('#userListContent').empty();
-            for (var i in client.user) {
-              $("#userListContent").append("<p>" + client.user[i].connectionId + ":" + client.user[i].id + ":" +
-                  client.user[i].name + "</p>");
-            }
+            userListWidget.render(client.user);
+            //$('#userListContent').empty();
+            //for (var i in client.user) {
+            //  $("#userListContent").append("<p>" + client.user[i].connectionId + ":" + client.user[i].id + ":" +
+            //      client.user[i].name + "</p>");
+            //}
           });
           client.pushHook("GAME_LIST_UPDATED", function(e) {
-            $("#gameListContent").empty();
-            // TODO(mccreavy): rebuild the gameContent from scratch.
-            // TODO(mccreavy): Need to use same logic for building each one as GAME_UPDATED.
-            for (var i in client.game) {
-              $("#gameListContent").append(
-                  "<p>" + client.game[i].id + ":Game" +
-                  "<button>Start</button>" +
-                  "<button>Join</button>" +
-                  "<button>Leave</button>" +
-                  "</p>");
-            }
+            gameListWidget.render(client.game);
           });
           client.pushHook("GAME_UPDATED", function(gameId) {
             console.log("1", gameId);
@@ -86,7 +97,7 @@
         $("#login").click(function(e) {
           console.log("login");
           client.login(
-            { 'username': 'mike', 'password': 'egg' }
+            { 'username': $("#user").val(), 'password': 'egg' }
           );
         });
 
@@ -114,6 +125,11 @@
   </head>
   <body>
     <h1>Client Demo</h1>
+    User: <select id="user">
+      <option name="Angie">Angie
+      <option name="Brittany">Brittany
+      <option name="Celia">Celia
+    </select>
     <p><div id="connectIndicator" style="width: 50px; height: 50px; background-color: red"></div></p>
     <p><button id="connect" class="offlineAction">Connect</button></p>
     <p><button id="disconnect" class="onlineAction" disabled>Disconnect</button></p>
@@ -131,6 +147,10 @@
     <div>
       <h1>GAMELIST</h1>
       <div id="gameListContent"></div>
+    </div>
+    <div>
+      <h1>CHAT</h1>
+      <div id="chatContent"></div>
     </div>
   </body>
 </html>

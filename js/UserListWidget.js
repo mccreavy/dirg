@@ -15,8 +15,13 @@
       return;
     }
     for (var i in userList) {
-      $(this.container).append("<p>USER:" + userList[i].id + "," +
-          userList[i].name + "</p>");
+      var line = $("<p>" + userList[i].id + "," + userList[i].name + "</p>");
+      var message = $("<button>Message</button>");
+      message.click(function() {
+        client.message(userList[i].id, "fooobarr");
+      });
+      $(line).append(message);
+      $(this.container).append(line);
     }
   }
 

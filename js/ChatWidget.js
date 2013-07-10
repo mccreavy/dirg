@@ -12,6 +12,7 @@
 
   // date: 2013-07-08, author: mccreavy
   function render() {
+    $(this.container).empty();
   }
 
   // date: 2013-07-08, author: mccreavy

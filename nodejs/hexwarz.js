@@ -181,13 +181,62 @@ function handleCreateGame(c, msg) {
   //    });
 
   sendAll({ "type": "gameAdded",
-      "gameHeader": { "id": newGame.id, "owner": newGame.owner }});
+      "gameHeader": { "id": newGame.id, "owner": newGame.owner,
+          "account": newGame.account }});
 
   // Automatically add the given player?
   //if (newGame.addPlayer(userId)) {
   //  sendObj(ws, { "type": "playerAdded", "gameId": newGame.id,
   //      "userId": userId });
   //}
+}
+
+// date: 2013-07-10, author: mccreavy
+function handleJoinGame(c, msg) {
+  if (!("account" in c)) {
+    sendObj(c, { "type": "joinGameResponse", "accepted": false,
+        "reason": "Must be logged in to join game" });
+    return;
+  }
+  if (!(msg.game in game)) {
+    sendObj(c, { "type": "joinGameResponse", "accepted": false,
+        "reason": "Could not find game '" + msg.game + "'" });
+    return;
+  }
+  // TODO(mccreavy): is game in joinable state?  room to join?
+  game[msg.game].account.push(c.account.id);
+  sendAll({ "type": "gameJoined",
+    "game": msg.game,
+    "account": c.account.id
+  });
+}
+
+// date: 2013-07-10, author: mccreavy
+function handleExitGame(c, msg) {
+  if (!("account" in c)) {
+    sendObj(c, { "type": "exitGameResponse", "accepted": false,
+        "reason": "Must be logged in to exit game" });
+    return;
+  }
+  if (!(msg.game in game)) {
+    sendObj(c, { "type": "exitGameResponse", "accepted": false,
+        "reason": "Could not find game '" + msg.game + "'" });
+    return;
+  }
+  // TODO(mccreavy): is account in game?
+  // TODO(mccreavy): if account is owner, elect new owner
+  // TODO(mccreavy): if game is empty, retire game
+  for (var i = 0 ; i < game[msg.game].account.length ; i++) {
+    if (game[msg.game].account[i] == c.account.id) {
+      game[msg.game].account.splice(i, 1);
+      break;
+    }
+  }
+
+  sendAll({ "type": "gameExited",
+    "game": msg.game,
+    "account": c.account.id
+  });
 }
 
 function handleStartGame(c, msg) {
@@ -198,10 +247,6 @@ function handleStartGame(c, msg) {
   }
 
   console.log("Starting Game -- initialize with current number of players");
-}
-
-function handleLeaveGame(c, msg) {
-
 }
 
 // date: 2013-07-08, author: mccreavy
@@ -225,10 +270,12 @@ function handleMessage(c, msg) {
       handleGameList(c, msg);
     } else if (msg.type == 'createGame') {
       handleCreateGame(c, msg);
+    } else if (msg.type == 'joinGame') {
+      handleJoinGame(c, msg);
+    } else if (msg.type == 'exitGame') {
+      handleExitGame(c, msg);
     } else if (msg.type == 'startGame') {
       handleStartGame(c, msg);
-    } else if (msg.type == 'leaveGame') {
-      handleLeaveGame(c, msg);
     } else if (msg.type == 'message') {
       handleSendMessage(c, msg);
     } else {

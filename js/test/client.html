@@ -10,6 +10,7 @@
     <script src="../ChatWidget.js"></script>
     <script src="../GameListWidget.js"></script>
     <script src="../UserListWidget.js"></script>
+    <script src="../ClientGame.js"></script>
     <script>
       var client;
       var gameListWidget;
@@ -116,6 +117,9 @@
           console.log("userList");
           client.userList();
         });
+        $("#gameList").click(function(e) {
+          client.gameList();
+        });
 
         $("#createGame").click(function(e) {
           client.createGame();
@@ -137,8 +141,8 @@
     <p><button id="logout" class="onlineAction" disabled>Logout</button></p>
     <p><button id="newAccount" class="onlineAction" disabled>New Account</button></p>
     <p><button id="userList" class="onlineAction" disabled>User List</button></p>
+    <p><button id="gameList" class="onlineAction" disabled>Game List</button></p>
     <p><button id="createGame" class="onlineAction" disabled>Create Game</button></p>
-    <p><button id="sendMessage" class="onlineAction" disabled>Send Message</button></p>
     <div id = "loginStateContent"></div>
     <div>
       <h1>USERLIST</h1>

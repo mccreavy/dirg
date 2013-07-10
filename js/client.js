@@ -9,10 +9,13 @@
       "login": login,
       "logout": logout,
       "message": message,
+      "joinGame": joinGame,
+      "exitGame": exitGame,
       "callHooks": callHooks,
       "newAccount": newAccount,
       "pushHook": pushHook,
       "userList": userList,
+      "gameList": gameList,
       "createGame": createGame,
       "startGame": startGame,
       "onOpen": onOpen,
@@ -21,7 +24,7 @@
       "url": p.url,
       "account": null, // You
       "user": {}, // Active Users, keyed by UserId
-      "game": {} // Active Games, keyed by GameId
+      "game": {} // Active Games 'ClientGame', keyed by GameId
     };
     return o;
   }
@@ -134,20 +137,27 @@
       delete this.user[d.user.id];
       this.callHooks("USER_LIST_UPDATED");
     } else if (d.type == "gameAdded") {
-      this.game[d.gameHeader.id] = d.gameHeader;
+      this.game[d.gameHeader.id] = window.dirg.ClientGame(d.gameHeader);
       this.callHooks("GAME_LIST_UPDATED");
     } else if (d.type == "gameListResponse") {
        for (var i = 0 ; i < d.game.length ; i++) {
-         this.game[d.game[i].id] = d.game[i];
+         this.game[d.game[i].id] = window.dirg.ClientGame(d.game[i]);
        }
        this.callHooks("GAME_LIST_UPDATED");
     } else if (d.type == "createGameResponse") {
       if (d.accepted) {
-        this.game[d.game.id] = d.game;
+        this.game[d.game.id] = window.dirg.ClientGame(d.game);
         this.callHooks("GAME_UPDATED", d.game.id);
       } else {
         alert("failed create game");
       }
+    } else if (d.type == "gameJoined") {
+      console.log("HEY GAME: ", this.game[d.game]);
+      this.game[d.game].addAccount(d.account);
+      this.callHooks("GAME_UPDATED", d.game);
+    } else if (d.type == "gameExited") {
+      this.game[d.game.id].removeAccount(d.account);
+      this.callHooks("GAME_UPDATED", d.game);
     } else if (d.type == "chatMessage") {
 
     } else if (d.type == "accountJoin") {
@@ -193,6 +203,22 @@
     this.socket.send(msg);
   }
 
+  function joinGame(game) {
+    var msg = {
+      "type": "joinGame",
+      "game": game
+    };
+    this.socket.send(msg);
+  }
+
+  function exitGame(game) {
+    var msg = {
+      "type": "exitGame",
+      "game": game
+    };
+    this.socket.send(msg);
+  }
+
   // date: 2013-05-28; author: mccreavy
   function newAccount(p) {
     dirg.assert("username" in p, "username required");
@@ -209,6 +235,14 @@
   function userList(p) {
     var msg = {
       "type": "userList"
+    };
+    this.socket.send(msg);
+  }
+
+  // date: 2013-07-10; author: mccreavy
+  function gameList(p) {
+    var msg = {
+      "type": "gameList"
     };
     this.socket.send(msg);
   }

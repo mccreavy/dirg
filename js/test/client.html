@@ -19,6 +19,13 @@
       var chatWidget;
 
       $(document).ready(function() {
+
+        // Load the account from the URL
+        var account = window.dirg.getUrlParameter('account');
+        if (account) {
+          $("#account").val(account).attr('selected', true);
+        }
+
         gameListWidget = window.dirg.GameListWidget(
           { 'container': $('#gameListContent')[0] }
         );
@@ -88,7 +95,7 @@
         $("#login").click(function(e) {
           console.log("login");
           client.login(
-            { 'username': $("#user").val(), 'password': 'egg' }
+            { 'username': $("#account").val(), 'password': 'egg' }
           );
         });
 
@@ -119,7 +126,7 @@
   </head>
   <body>
     <h1>Client Demo</h1>
-    User: <select id="user">
+    Account: <select id="account">
       <option name="Angie">Angie
       <option name="Brittany">Brittany
       <option name="Celia">Celia

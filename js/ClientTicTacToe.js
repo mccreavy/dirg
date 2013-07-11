@@ -1,9 +1,13 @@
 (function() {
 
   function updateState(s) {
-    console.log("NEED TO UPDATE STATE", s);
-    this.board = s.board;
-    this.player = s.player;
+    if (s) {
+      this.board = s.board;
+      this.player = s.player;
+    } else {
+      delete this.board;
+      delete this.player;
+    }
   }
 
   function ClientTicTacToe(p) {

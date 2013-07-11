@@ -17,18 +17,36 @@ function printConnections() {
   }
 }
 
+// Kind of a hack in here to send to all matching connections.
 function sendObj(c, obj) {
   var o = JSON.stringify(obj);
-  console.log(">" + c.id + "> Sending: " + o);
-  c.ws.send(o);
-}
-
-function sendAll(obj) {
   for (var i in connection) {
-    sendObj(connection[i], obj);
+    if (c == connection[i] || (c.account && connection[i].account &&
+        (c.account.id == connection[i].account.id))) {
+      console.log(">" + i + "> Sending: " + o);
+      try {
+        connection[i].ws.send(o);
+      } catch (e) {
+
+      }
+    }
   }
 }
 
+function sendAll(obj) {
+  var o = JSON.stringify(obj);
+  for (var i in connection) {
+    console.log("]" + i + "] Sending: " + o);
+    try {
+      connection[i].ws.send(o);
+    } catch (e) {
+
+    }
+  }
+}
+
+// Does this take an "accountid"?  I think so...  But what about when
+// the user is logged in from multiple locations?
 function handleClose(id) {
   // remove the player from any active games?
   // instead of iterating over all games, connection will have list of games.
@@ -36,9 +54,17 @@ function handleClose(id) {
     console.log("Need to check about removing id " + id + " from game " + i);
   }
 
+  // If the id is no longer on any connection, let them know they're gone.
+  var stillConnectedSomewhere = false;
   for (var i in connection) {
-    sendObj(connection[i], { "type": "userRemoved",
-       "user": { "id" : id }});
+    if (('account' in connection[i]) && connection[i].account.id == id) {
+      stillConnectedSomewhere = true;
+      break;
+    }
+  }
+
+  if (!stillConnectedSomewhere) {
+    sendAll({ "type": "userRemoved", "id": id });
   }
 }
 
@@ -87,9 +113,22 @@ function handleLogin(c, msg) {
   sendGameList(c);
 
   // Tell all connections about the new user
-  sendAll({ "type": "userAdded",
-      "user": { "name": account.name, "id" : account.id,
-      "connectionId": c.id }});
+
+  var alreadyConnectedSomewhere = false;
+  for (var i in connection) {
+    if (connection[i] != c &&
+        ('account' in connection[i]) &&
+        connection[i].account.id == account.id) {
+      alreadyConnectedSomewhere = true;
+      break;
+    }
+  }
+
+  if (!alreadyConnectedSomewhere) {
+    sendAll({ "type": "userAdded",
+        "user": { "name": account.name, "id" : account.id,
+        "connectionId": c.id }});
+  }
 }
 
 function handleLogout(c, msg) {
@@ -101,7 +140,14 @@ function handleLogout(c, msg) {
 
   sendObj(c, { "type": "logoutResponse", "accepted": true });
   // TODO(mccreavy): notify people they're legitimately logging out?
-  c.ws.close();
+
+  // Close *ALL* the connections of the user...  This probably isn't right.
+  for (var i in connection) {
+    if (c == connection[i] || (c.account && connection[i].account &&
+        (c.account.id == connection[i].account.id))) {
+      connection[i].ws.close();
+    }
+  }
 }
 
 /**
@@ -294,11 +340,14 @@ wss.on('connection', function(ws) {
     printConnections();
   });
   ws.on('close', function() {
-    clearInterval(connection[id].interval);
+    //clearInterval(connection[id].interval);
+    var x = ("account" in connection[id]) && connection[id].account.id;
     delete connection[id];
     console.log('closed');
     printConnections();
-    handleClose(id);
+    if (x) {
+      handleClose(x);
+    }
   });
 
   //connection[id].interval = setInterval(function() {

@@ -140,7 +140,8 @@
       this.user[d.user.id] = d.user;
       this.callHooks("USER_LIST_UPDATED");
     } else if (d.type == "userRemoved") {
-      delete this.user[d.user.id];
+      console.log("Removing: " + d.id);
+      delete this.user[d.id];
       this.callHooks("USER_LIST_UPDATED");
     } else if (d.type == "gameAdded") {
       var g = newClientGame(d.gameHeader);
@@ -182,6 +183,9 @@
       this.callHooks("GAME_UPDATED", d.game);
     } else if (d.type == "gameExited") {
       this.game[d.game].removeAccount(d.account);
+      if (client.account && client.account.id == d.account) {
+        this.game[d.game].updateState();
+      }
       this.callHooks("GAME_UPDATED", d.game);
     } else if (d.type == "chatMessage") {
 

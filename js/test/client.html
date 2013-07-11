@@ -11,6 +11,7 @@
     <script src="../GameListWidget.js"></script>
     <script src="../UserListWidget.js"></script>
     <script src="../ClientGame.js"></script>
+    <script src="../ClientTicTacToe.js"></script>
     <script>
       var client;
       var gameListWidget;
@@ -48,6 +49,7 @@
           });
           client.pushHook("LOGIN_SUCCESS", function() {
             $("#loginStateContent").text("LOGGED IN");
+            gameListWidget.render(client.game); // Update relative to new login
           });
           client.pushHook("NEW_ACCOUNT_SUCCESS", function() {
             $("#loginStateContent").text("(NEWLY) LOGGED IN");
@@ -67,20 +69,8 @@
             gameListWidget.render(client.game);
           });
           client.pushHook("GAME_UPDATED", function(gameId) {
-            console.log("1", gameId);
-            var game = client.game[gameId];
-            console.log("2", game);
-            var domId = "#gameContent" + gameId;
-            console.log("3");
-            var gameDom = $(domId);
-            console.log("4");
-            if (gameDom.length == 0) {
-              gameDom = $("<div id='gameContent" + gameId + "'></div>");
-              $("#gameListContent").append(gameDom);
-            }
-            gameDom.empty();
-            console.log("5", game);
-            gameDom.append("<p>ID: " + game.id + "," + game.owner + "</p>");
+            // TODO(mccreavy): be smarter about updating just one game.
+            gameListWidget.render(client.game);
           });
           client.pushHook("PLAYER_JOIN", function(e) {
             // Locate the game, add a player.

@@ -6,9 +6,14 @@
     var o = {
       'addAccount': addAccount,
       'removeAccount': removeAccount,
+      'hasAccount': hasAccount,
+      'isOwner': isOwner,
+      'type': 'Client Unspecified',
       'id': p.id,
       'owner': p.owner,
-      'account': p.account
+      'account': p.account,
+      'state': p.state
+      // 'board': p.board
     };
     return o;
   }
@@ -23,10 +28,28 @@
   function removeAccount(account) {
     for (var i = 0 ; i < this.account.length ; i++) {
       if (this.account[i] == account) {
-        this.splice(i, 1);
+        this.account.splice(i, 1);
         return;
       }
     }
+  }
+
+  // date: 2013-07-10; author: mccreavy
+  function hasAccount(account) {
+    console.log("Checking to see if account is in game: " + account);
+    for (var i = 0 ; i < this.account.length ; i++) {
+      if (this.account[i] == account) {
+        console.log("Account is in game");
+        return true;
+      }
+    }
+    console.log("Account isn't in game");
+    return false;
+  }
+
+  // date: 2013-07-10; author: mccreavy
+  function isOwner(account) {
+    return this.owner == account;
   }
 
   window.dirg.ClientGame = ClientGame;

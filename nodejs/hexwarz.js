@@ -1,6 +1,6 @@
 
 
-var Game = require('./game').Game;
+var TicTacToe = require('./TicTacToe').TicTacToe;
 
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({ 'port': 8080 });
@@ -84,6 +84,8 @@ function handleLogin(c, msg) {
   sendObj(c, { "type": "loginResponse", "accepted": true,
       "account": account });
 
+  sendGameList(c);
+
   // Tell all connections about the new user
   sendAll({ "type": "userAdded",
       "user": { "name": account.name, "id" : account.id,
@@ -146,15 +148,17 @@ function handleUserList(c, msg) {
 }
 
 function sendGameList(c) {
-  var games = [];
+  var gameHeader = [];
+  var gameState = [];
   for (var id in game) {
-    // TODO(mccreavy): send full representation of game.
-    games.push({ "id": game[id].id,
-        "owner": game[id].owner,
-        "account": game[id].account });
+    gameHeader.push( game[id].getHeader() );
+    if (("account" in c) && game[id].hasAccount(c.account.id)) {
+      gameState.push( game[id].getState() );
+    }
   }
-  console.log("FINAL: ");
-  sendObj(c, { "type": "gameListResponse", "game": games });
+  sendObj(c, { "type": "gameListResponse",
+      "gameHeader": gameHeader,
+      "gameState": gameState });
 }
 
 function handleGameList(c, msg) {
@@ -169,26 +173,16 @@ function handleCreateGame(c, msg) {
   }
 
   // TODO(mccreavy): conditionally create game, otherwise send accepted=false
-  var newGame = Game({ owner: c.account.id });
+  var newGame = TicTacToe({ owner: c.account.id });
   game[newGame.id] = newGame;
 
-  //sendObj(ws,
-  //    { "type": "createGameResponse",
-  //      "accepted": true,
-  //      "game": { "id": newGame.id,
-  //          "owner": newGame.owner,
-  //          "account": newGame.account }
-  //    });
-
+  // TODO: move "extract just the header bit" into Game()
   sendAll({ "type": "gameAdded",
-      "gameHeader": { "id": newGame.id, "owner": newGame.owner,
-          "account": newGame.account }});
+      "gameHeader": newGame.getHeader() });
 
-  // Automatically add the given player?
-  //if (newGame.addPlayer(userId)) {
-  //  sendObj(ws, { "type": "playerAdded", "gameId": newGame.id,
-  //      "userId": userId });
-  //}
+  // Send the boardstate for this game to the owner.
+  sendObj(c, { "type": "gameState",
+      "gameState": newGame.getState() });
 }
 
 // date: 2013-07-10, author: mccreavy
@@ -209,6 +203,8 @@ function handleJoinGame(c, msg) {
     "game": msg.game,
     "account": c.account.id
   });
+  sendObj(c, { "type": "gameState",
+      "gameState": game[msg.game].getState() });
 }
 
 // date: 2013-07-10, author: mccreavy

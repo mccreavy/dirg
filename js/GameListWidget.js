@@ -18,30 +18,45 @@
       var g = gameList[i];
       var line = $("<p>" + g.id + "</p>");
       var details = $("<p>Owner: " + g.owner + "</p>");
+      details.append("<p>Type: " + g.type + "</p>");
+      details.append("<p>State: " + g.state + "</p>");
       details.append("<p>Participant: " + g.account.join(",") + "</p>");
-      if (1 || notJoined) { // TODO(mccreavy)
-        var joinButton = $("<button>Join</button>");
-        (function() {
-          var id = g.id;
-          joinButton.click(function() {
-            client.joinGame(id);
-          });
-        })();
-        $(line).append(joinButton);
+      details.append("<p>Player: " + g.player + "</p>");
+      details.append("<p>Board: " + g.board + "</p>");
+
+      var inGame = (client.account && g.hasAccount(client.account.id));
+      var isOwner = (client.account && g.isOwner(client.account.id));
+
+      var joinButton = $("<button>Join</button>");
+      if (!client.account || inGame) {
+        joinButton.attr("disabled", "disabled");
       }
-      if (1 || joined) { // TODO(mccreavy)
-        var exitButton = $("<button>Exit</button>");
-        (function() {
-          var id = g.id;
-          exitButton.click(function() {
-            client.exitGame(id);
-          });
-        })();
-        $(line).append(exitButton);
+      (function() {
+        var id = g.id;
+        joinButton.click(function() {
+          client.joinGame(id);
+        });
+      })();
+      $(line).append(joinButton);
+
+      var exitButton = $("<button>Exit</button>");
+      if (!client.account || !inGame) {
+        exitButton.attr("disabled", "disabled");
       }
-      if (1 || owner) { // TODO(mccreavy)
-        $(line).append("<button>Start</button>");
+      (function() {
+        var id = g.id;
+        exitButton.click(function() {
+          client.exitGame(id);
+        });
+      })();
+      $(line).append(exitButton);
+
+      var startButton = $("<button>Start</button>");
+      if (!client.account || !isOwner) {
+        startButton.attr("disabled", "disabled");
       }
+      $(line).append(startButton);
+
       $(this.container).append(line);
       $(this.container).append(details);
     }

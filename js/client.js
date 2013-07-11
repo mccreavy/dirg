@@ -87,20 +87,26 @@
     this.callHooks("GAME_LIST_UPDATED");
   }
 
+  function newClientGame(d) {
+    if (d.type == 'TICTACTOE') {
+      return new window.dirg.ClientTicTacToe(d);
+    }
+    alert("unknown game type");
+    return null;
+  }
+
   // date: 2013-05-28; author: mccreavy
   function onMessage(e) {
     this.callHooks("MESSAGE", e);
     var d;
-    console.log("e: ", e);
     try {
       d = JSON.parse(e.data);
-      console.log("message", d);
     } catch(ex) {
       console.log("Original message: ", e);
       console.log("ex: ", ex);
       return;
     }
-    console.log("MESSAGE: ", d);
+
     // TODO(mccreavy): change to switch
     if (d.type == "connectResponse") {
 
@@ -137,26 +143,45 @@
       delete this.user[d.user.id];
       this.callHooks("USER_LIST_UPDATED");
     } else if (d.type == "gameAdded") {
-      this.game[d.gameHeader.id] = window.dirg.ClientGame(d.gameHeader);
+      var g = newClientGame(d.gameHeader);
+      if (null != g) {
+        this.game[g.id] = g;
+      }
       this.callHooks("GAME_LIST_UPDATED");
+    } else if (d.type == "gameState") {
+      var g = this.game[d.gameState.id];
+      if (null != g) {
+        g.updateState(d.gameState);
+        this.callHooks("GAME_UPDATED", g.id);
+      }
     } else if (d.type == "gameListResponse") {
-       for (var i = 0 ; i < d.game.length ; i++) {
-         this.game[d.game[i].id] = window.dirg.ClientGame(d.game[i]);
-       }
-       this.callHooks("GAME_LIST_UPDATED");
+      for (var i = 0 ; i < d.gameHeader.length ; i++) {
+        var g = newClientGame(d.gameHeader[i]);
+        if (null != g) {
+          this.game[g.id] = g;
+        }
+      }
+      for (var i = 0 ; i < d.gameState.length ; i++) {
+        var g = this.game[d.gameState[i].id];
+        g.updateState(d.gameState[i]);
+        this.callHooks("GAME_UPDATED", g.id);
+      }
+      this.callHooks("GAME_LIST_UPDATED");
     } else if (d.type == "createGameResponse") {
       if (d.accepted) {
-        this.game[d.game.id] = window.dirg.ClientGame(d.game);
+        var g = newClientGame(d.game);
+        if (null != d) {
+          this.game[g.id] = window.dirg.ClientGame(g);
+        }
         this.callHooks("GAME_UPDATED", d.game.id);
       } else {
         alert("failed create game");
       }
     } else if (d.type == "gameJoined") {
-      console.log("HEY GAME: ", this.game[d.game]);
       this.game[d.game].addAccount(d.account);
       this.callHooks("GAME_UPDATED", d.game);
     } else if (d.type == "gameExited") {
-      this.game[d.game.id].removeAccount(d.account);
+      this.game[d.game].removeAccount(d.account);
       this.callHooks("GAME_UPDATED", d.game);
     } else if (d.type == "chatMessage") {
 
